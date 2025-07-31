@@ -7,57 +7,65 @@ import { deleteReview, readMovie, updateReview } from "../utils/api";
 import ErrorAlert from "../shared/ErrorAlert";
 
 function FullMovie() {
-  const { movieId } = useParams();
-  const [movie, setMovie] = useState({});
-  const [error, setError] = useState(null);
+	const { movieId } = useParams();
+	const [movie, setMovie] = useState({});
+	const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(true);
+	console.log("FullMovie component loaded with movieId:", loading);
 
-  useEffect(() => {
-    loadMovie(movieId);
-  }, [movieId]);
+	function loadMovie(movieId) {
+		setLoading(true);
+		setError(null);
+		const abortController = new AbortController();
+		readMovie(movieId, abortController.signal)
+			.then(setMovie)
+			.catch(setError)
+			.finally(() => setLoading(false));
 
-  function loadMovie(movieId) {
-    setError(null);
-    const abortController = new AbortController();
-    readMovie(movieId, abortController.signal).then(setMovie).catch(setError);
-    return () => abortController.abort();
-  }
+		return () => abortController.abort();
+	}
 
-  function deleteReviewHandler({ movie_id: movieId, review_id: reviewId }) {
-    deleteReview(reviewId).then(() => loadMovie(movieId));
-  }
+	function deleteReviewHandler({ movie_id, review_id }) {
+		deleteReview(review_id).then(() => loadMovie(movie_id));
+	}
 
-  function updateScoreHandler(
-    { movie_id: movieId, review_id: reviewId },
-    score
-  ) {
-    console.log("score", reviewId, score);
-    updateReview(reviewId, { score }).then(() => loadMovie(movieId));
-  }
+	function updateScoreHandler({ movie_id, review_id }, score) {
+		updateReview(review_id, { score }).then(() => loadMovie(movie_id));
+	}
 
-  return (
-    <div className="container">
-      <ErrorAlert error={error} />
-      <section className="row mt-4">
-        <article className="col-sm-12 col-md-6 col-lg-3">
-          <img
-            alt={`${movie.title} Poster`}
-            className="rounded"
-            src={movie.image_url}
-            style={{ width: "100%" }}
-          />
-        </article>
-        <aside className="col-sm-12 col-md-6 col-lg-9">
-          <Details movie={movie} />
-          <TheaterList theaters={movie.theaters} />
-          <ReviewList
-            reviews={movie.reviews}
-            deleteReview={deleteReviewHandler}
-            setReviewScore={updateScoreHandler}
-          />
-        </aside>
-      </section>
-    </div>
-  );
+	useEffect(() => {
+		loadMovie(movieId);
+	}, [movieId]);
+
+	return (
+		<div className='container'>
+			<ErrorAlert error={error} />
+
+			{loading && <p>Loading...</p>}
+
+			{!loading && !error && (
+				<section className='row mt-4'>
+					<article className='col-sm-12 col-md-6 col-lg-3'>
+						<img
+							alt={`${movie.title} Poster`}
+							className='rounded'
+							src={movie.image_url}
+							style={{ width: "100%" }}
+						/>
+					</article>
+					<aside className='col-sm-12 col-md-6 col-lg-9'>
+						<Details movie={movie} />
+						<TheaterList theaters={movie.theaters} />
+						<ReviewList
+							reviews={movie.reviews}
+							deleteReview={deleteReviewHandler}
+							setReviewScore={updateScoreHandler}
+						/>
+					</aside>
+				</section>
+			)}
+		</div>
+	);
 }
 
 export default FullMovie;

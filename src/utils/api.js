@@ -45,6 +45,11 @@ async function fetchJson(url, options, onCancel) {
   }
 }
 
+/**
+ *  Populates the `reviews` property of a movie with its reviews
+ * @param {AbortController} signal 
+ * @returns {() => Promise<movie>} 
+ */
 function populateReviews(signal) {
   return async (movie) => {
     const url = `${API_BASE_URL}/movies/${movie.movie_id}/reviews`;
