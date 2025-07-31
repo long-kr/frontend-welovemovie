@@ -26,26 +26,28 @@ function Review({ review, deleteReview, setReviewScore }) {
 				{critic?.preferred_name} {critic?.surname}
 				<small> of {critic.organization_name}</small>
 			</h4>
+
 			<p
 				dangerouslySetInnerHTML={{ __html: markdown.toHTML(review.content) }}
 			/>
-			<p>
-				<strong>Rating:</strong> {review.score}
+
+			<div className='d-flex'>
+				<strong>Rating:</strong> <span className='mx-1'>{review.score}</span>
 				<button
-					className='btn btn-link'
+					className='btn btn-link mr-2'
 					style={scoreButtonStyle}
 					onClick={() => handleIncreaseClick()}
 				>
 					↑
 				</button>
 				<button
-					className='btn btn-link'
+					className='btn btn-link mr-2'
 					style={scoreButtonStyle}
 					onClick={() => handleDecreaseClick()}
 				>
 					↓
 				</button>
-			</p>
+			</div>
 
 			{/* <button className="btn btn-danger" onClick={() => deleteReview(review)}>
         Destroy Review

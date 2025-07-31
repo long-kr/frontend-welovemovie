@@ -4,29 +4,35 @@ import ErrorAlert from "../shared/ErrorAlert";
 import { listMovies } from "../utils/api";
 
 function DetailedMoviesList() {
-  const [movies, setMovies] = useState([]);
-  const [error, setError] = useState(null);
+	const [movies, setMovies] = useState([]);
+	const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setError(null);
-    const abortController = new AbortController();
-    listMovies(abortController.signal).then(setMovies).catch(setError);
+	useEffect(() => {
+		setLoading(true);
+		setError(null);
+		const abortController = new AbortController();
+		listMovies(abortController.signal)
+			.then(setMovies)
+			.catch(setError)
+			.finally(() => setLoading(false));
 
-    return () => abortController.abort();
-  }, []);
+		return () => abortController.abort();
+	}, []);
 
-  const list = movies.map((movie) => (
-    <DetailedMovie key={movie.movie_id} movie={movie} />
-  ));
+	const list = movies.map((movie) => (
+		<DetailedMovie key={movie.movie_id} movie={movie} />
+	));
 
-  return (
-    <main className="container">
-      <ErrorAlert error={error} />
-      <h2 className="font-poppins">All Movies</h2>
-      <hr />
-      <section>{list}</section>
-    </main>
-  );
+	return (
+		<main className='container'>
+			<ErrorAlert error={error} />
+
+			<h2 className='font-poppins'>All Movies</h2>
+			<hr />
+			{loading ? <p>Loading...</p> : list}
+		</main>
+	);
 }
 
 export default DetailedMoviesList;
