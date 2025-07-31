@@ -11,18 +11,14 @@ function FullMovie() {
 	const [movie, setMovie] = useState({});
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(true);
-	console.log("FullMovie component loaded with movieId:", loading);
 
-	function loadMovie(movieId) {
-		setLoading(true);
+	function loadMovie(movieId, signal) {
 		setError(null);
-		const abortController = new AbortController();
-		readMovie(movieId, abortController.signal)
+
+		readMovie(movieId, signal)
 			.then(setMovie)
 			.catch(setError)
 			.finally(() => setLoading(false));
-
-		return () => abortController.abort();
 	}
 
 	function deleteReviewHandler({ movie_id, review_id }) {
@@ -34,7 +30,13 @@ function FullMovie() {
 	}
 
 	useEffect(() => {
-		loadMovie(movieId);
+		const abortController = new AbortController();
+		setLoading(true);
+		loadMovie(movieId, abortController.signal);
+
+		return () => {
+			abortController.abort();
+		};
 	}, [movieId]);
 
 	return (
