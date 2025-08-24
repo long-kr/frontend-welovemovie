@@ -5,6 +5,7 @@ import ReviewList from "./ReviewList";
 import TheaterList from "./TheaterList";
 import { deleteReview, readMovie, updateReview } from "../utils/api";
 import ErrorAlert from "../shared/ErrorAlert";
+import Loading from "../ui/Loading";
 
 function FullMovie() {
 	const { movieId } = useParams();
@@ -12,21 +13,20 @@ function FullMovie() {
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(true);
 
-	function loadMovie(movieId, signal) {
+	async function loadMovie(movieId, signal) {
 		setError(null);
-
-		readMovie(movieId, signal)
-			.then(setMovie)
-			.catch(setError)
-			.finally(() => setLoading(false));
+		try {
+			const data = await readMovie(movieId, signal);
+			setMovie(data);
+		} catch (error) {
+			setError(error);
+		}
+		setLoading(false);
 	}
 
-	function deleteReviewHandler({ movie_id, review_id }) {
-		deleteReview(review_id).then(() => loadMovie(movie_id));
-	}
-
-	function updateScoreHandler({ movie_id, review_id }, score) {
-		updateReview(review_id, { score }).then(() => loadMovie(movie_id));
+	async function updateScoreHandler({ movie_id, review_id }, score) {
+		await updateReview(review_id, { score });
+		loadMovie(movie_id);
 	}
 
 	useEffect(() => {
@@ -43,7 +43,7 @@ function FullMovie() {
 		<div className='container'>
 			<ErrorAlert error={error} />
 
-			{loading && <p>Loading...</p>}
+			{!loading && <Loading />}
 
 			{!loading && !error && (
 				<section className='row mt-4'>
@@ -60,7 +60,6 @@ function FullMovie() {
 						<TheaterList theaters={movie.theaters} />
 						<ReviewList
 							reviews={movie.reviews}
-							deleteReview={deleteReviewHandler}
 							setReviewScore={updateScoreHandler}
 						/>
 					</aside>

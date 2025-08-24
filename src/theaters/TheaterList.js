@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Theater from "./Theater";
 import ErrorAlert from "../shared/ErrorAlert";
 import { listTheaters } from "../utils/api";
+import { Loading } from "../ui";
 
 function TheaterList() {
 	const [theaters, setTheaters] = useState([]);
@@ -30,7 +31,7 @@ function TheaterList() {
 			<ErrorAlert error={error} />
 			<h2 className='font-poppins'>All Theaters</h2>
 			<hr />
-			{loading ? <p>Loading...</p> : <section className='row'>{list}</section>}
+			{loading ? <Loading /> : <section className='row'>{list}</section>}
 		</main>
 	);
 }

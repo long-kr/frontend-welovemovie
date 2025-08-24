@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DetailedMovie from "./DetailedMovie";
 import ErrorAlert from "../shared/ErrorAlert";
 import { listMovies } from "../utils/api";
+import { Loading } from "../ui";
 
 function DetailedMoviesList() {
 	const [movies, setMovies] = useState([]);
@@ -30,7 +31,7 @@ function DetailedMoviesList() {
 
 			<h2 className='font-poppins'>All Movies</h2>
 			<hr />
-			{loading ? <p>Loading...</p> : list}
+			{loading ? <Loading /> : list}
 		</main>
 	);
 }

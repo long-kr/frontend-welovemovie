@@ -5,7 +5,7 @@ const scoreButtonStyle = {
 	padding: "0 0px 5px 5px",
 };
 
-function Review({ review, deleteReview, setReviewScore }) {
+function Review({ review, setReviewScore }) {
 	const handleIncreaseClick = () => {
 		const score = review.score + 1;
 		if (score > 5) return;
@@ -48,10 +48,6 @@ function Review({ review, deleteReview, setReviewScore }) {
 					↓
 				</button>
 			</div>
-
-			{/* <button className="btn btn-danger" onClick={() => deleteReview(review)}>
-        Destroy Review
-      </button> */}
 		</section>
 	);
 }
