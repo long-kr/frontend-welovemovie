@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Details from "./Details";
 import ReviewList from "./ReviewList";
 import TheaterList from "./TheaterList";
-import { deleteReview, readMovie, updateReview } from "../utils/api";
+import { readMovie, updateReview } from "../utils/api";
 import ErrorAlert from "../shared/ErrorAlert";
 import Loading from "../ui/Loading";
 
