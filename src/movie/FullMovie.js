@@ -21,7 +21,6 @@ function FullMovie() {
 		} catch (error) {
 			setError(error);
 		}
-		setLoading(false);
 	}
 
 	async function updateScoreHandler({ movie_id, review_id }, score) {
@@ -32,7 +31,7 @@ function FullMovie() {
 	useEffect(() => {
 		const abortController = new AbortController();
 		setLoading(true);
-		loadMovie(movieId, abortController.signal);
+		loadMovie(movieId, abortController.signal).then(() => setLoading(false));
 
 		return () => {
 			abortController.abort();
@@ -43,9 +42,9 @@ function FullMovie() {
 		<div className='container'>
 			<ErrorAlert error={error} />
 
-			{!loading && <Loading />}
-
-			{!loading && !error && (
+			{loading ? (
+				<Loading />
+			) : (
 				<section className='row mt-4'>
 					<article className='col-sm-12 col-md-6 col-lg-3'>
 						<img
