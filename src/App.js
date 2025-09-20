@@ -1,31 +1,37 @@
-import Header from "./shared/Header";
-import MoviesList from "./home/MoviesList";
-import DetailedMoviesList from "./movies/DetailedMoviesList";
-import FullMovie from "./movie/FullMovie";
-import TheaterList from "./theaters/TheaterList";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import Header from './shared/Header';
+import HomePage from './home/HomePage';
+import ListMoviesPage from './movies/ListMoviesPage';
+import MovieDetailPage from './movie/MovieDetailPage';
+import TheaterList from './theaters/TheaterList';
+import { Switch, Route, BrowserRouter as Router } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-function App() {
-	return (
-		<Router>
-			<Header />
+const queryClient = new QueryClient();
 
-			<Switch>
-				<Route exact path='/'>
-					<MoviesList />
-				</Route>
-				<Route exact path='/movies'>
-					<DetailedMoviesList />
-				</Route>
-				<Route exact path='/movies/:movieId'>
-					<FullMovie />
-				</Route>
-				<Route exact path='/theaters'>
-					<TheaterList />
-				</Route>
-			</Switch>
-		</Router>
-	);
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Header />
+
+        <Switch>
+          <Route exact path="/">
+            <HomePage />
+          </Route>
+
+          <Route exact path="/movies">
+            <ListMoviesPage />
+          </Route>
+
+          <Route exact path="/movies/:movieId">
+            <MovieDetailPage />
+          </Route>
+
+          <Route exact path="/theaters">
+            <TheaterList />
+          </Route>
+        </Switch>
+      </Router>
+    </QueryClientProvider>
+  );
 }
-
-export default App;
