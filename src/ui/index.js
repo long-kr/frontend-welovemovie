@@ -1,4 +1,4 @@
-import { default as Loading } from "./Loading";
-import { default as Toast } from "./Toast";
+import { default as Loading } from './Loading';
+import { default as ToastProvider, useToast } from './Toast';
 
-export { Loading, Toast };
+export { Loading, ToastProvider, useToast };
