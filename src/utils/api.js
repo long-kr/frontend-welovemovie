@@ -1,119 +1,141 @@
+import axios from 'axios';
+
 const API_BASE_URL =
-	process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
 /**
- * Defines the default headers for these functions to work with `json-server`
+ * Default headers for API calls (json-server friendly)
+ * @type {{[k:string]: string}}
  */
-const headers = new Headers();
-headers.append("Content-Type", "application/json");
+export const defaultHeaders = { 'Content-Type': 'application/json' };
+
+const defaultOnCancel = () => undefined;
 
 /**
- * Fetch `json` from the specified URL and handle error status codes and ignore `AbortError`s
- *
- * This function is NOT exported because it is not needed outside of this file.
- *
- * @param url
- *  the url for the requst.
- * @param options
- *  any options for fetch
- * @param onCancel
- *  value to return if fetch call is aborted. Default value is undefined.
- * @returns {Promise<Error|any>}
- *  a promise that resolves to the `json` data or an error.
- *  If the response is not in the 200 - 399 range the promise is rejected.
+ * Helper typedef for react-query queryFn context
+ * @typedef {{ signal?: AbortSignal }} QueryContext
  */
-async function fetchJson(url, options, onCancel) {
-	try {
-		const response = await fetch(url, options);
 
-		if (response.status === 204) {
-			return null;
-		}
+/**
+ * Fetch JSON using axios. Accepts a string or URL.
+ * @param {string|URL} url
+ * @param {object} [options]
+ * @param {AbortSignal} [options.signal]
+ * @param {string} [options.method]
+ * @param {object} [options.headers]
+ * @param {any} [options.body]
+ * @param {function} [onCancel]
+ * @returns {Promise<any>}
+ */
+async function fetchJson(url, options = {}, onCancel = defaultOnCancel) {
+  try {
+    const config = {
+      url: String(url),
+      method: (options.method ?? 'get').toUpperCase(),
+      headers: options.headers ?? defaultHeaders,
+      data: options.body,
+      signal: options.signal,
+      ...options,
+    };
 
-		const payload = await response.json();
+    const response = await axios(config);
 
-		if (payload.error) {
-			return Promise.reject({ message: payload.error });
-		}
-		return payload.data;
-	} catch (error) {
-		if (error.name !== "AbortError") {
-			console.error(error.stack);
-			throw error;
-		}
-		return Promise.resolve(onCancel);
-	}
+    if (response.status === 204) return null;
+
+    return response.data;
+  } catch (error) {
+    const err = /** @type {any} */ (error);
+    const isCanceled =
+      (axios.isCancel && axios.isCancel(err)) ||
+      (err && (err.code === 'ERR_CANCELED' || err.name === 'CanceledError'));
+
+    if (isCanceled) return onCancel();
+
+    // eslint-disable-next-line no-console
+    // console.error(err && (err.stack || err));
+    throw err;
+  }
 }
 
 /**
- *  Populates the `reviews` property of a movie with its reviews
- * @param {AbortController} signal
- * @returns {() => Promise<movie>}
+ * Populates the `reviews` property of a movie with its reviews
+ * @param {AbortSignal} [signal]
+ * @returns {(movie: any) => Promise<any>}
  */
 function populateReviews(signal) {
-	return async (movie) => {
-		const url = `${API_BASE_URL}/movies/${movie.movie_id}/reviews`;
-		movie.reviews = await fetchJson(url, { headers, signal }, []);
-		return movie;
-	};
+  return async movie => {
+    const url = `${API_BASE_URL}/movies/${movie.movie_id}/reviews`;
+    const res = await fetchJson(url, { signal });
+    movie.reviews = res?.data ?? res;
+    return movie;
+  };
 }
 
+/**
+ * Populates the `theaters` property of a movie with its theaters
+ * @param {AbortSignal} [signal]
+ * @returns {(movie: any) => Promise<any>}
+ */
 function populateTheaters(signal) {
-	return async (movie) => {
-		const url = `${API_BASE_URL}/movies/${movie.movie_id}/theaters`;
-		movie.theaters = await fetchJson(url, { headers, signal }, []);
-		return movie;
-	};
+  return async movie => {
+    const url = `${API_BASE_URL}/movies/${movie.movie_id}/theaters`;
+    const res = await fetchJson(url, { signal });
+    movie.theaters = res?.data ?? res;
+    return movie;
+  };
 }
 
 /**
- * Retrieves all existing movies and populates the `reviews` property
- * @returns {Promise<[movie]>}
- *  a promise that resolves to a possibly empty array of movies saved in the database.
+ * Update a review by id
+ * @param {number|string} reviewId
+ * @param {any} data
+ * @returns {Promise<any>}
  */
-export async function listMovies(signal) {
-	const url = new URL(`${API_BASE_URL}/movies?is_showing=true`);
-	const addReviews = populateReviews(signal);
-	return await fetchJson(url, { headers, signal }, []).then((movies) =>
-		Promise.all(movies.map(addReviews))
-	);
-}
-
-/**
- * Retrieves all existing theaters
- * @returns {Promise<[theater]>}
- *  a promise that resolves to a possibly empty array of theaters saved in the database.
- */
-export async function listTheaters(signal) {
-	const url = new URL(`${API_BASE_URL}/theaters`);
-	return await fetchJson(url, { headers, signal }, []);
-}
-
-/**
- * Retrieves all existing movies and populates the `reviews` property
- * @returns {Promise<[movie]>}
- *  a promise that resolves to a possibly empty array of movies saved in the database.
- */
-export async function readMovie(movieId, signal) {
-	const url = new URL(`${API_BASE_URL}/movies/${movieId}`);
-	const addReviews = populateReviews(signal);
-	const addTheaters = populateTheaters(signal);
-	return await fetchJson(url, { headers, signal }, [])
-		.then(addReviews)
-		.then(addTheaters);
-}
-
-export async function deleteReview(reviewId) {
-	const url = `${API_BASE_URL}/reviews/${reviewId}`;
-	return await fetchJson(url, { method: "DELETE", headers }, {});
-}
-
 export async function updateReview(reviewId, data) {
-	const url = `${API_BASE_URL}/reviews/${reviewId}`;
-	const options = {
-		method: "PUT",
-		headers,
-		body: JSON.stringify({ data }),
-	};
-	return await fetchJson(url, options, {});
+  const url = `${API_BASE_URL}/reviews/${reviewId}`;
+  const options = {
+    method: 'PUT',
+    body: { data },
+  };
+  return await fetchJson(url, options);
 }
+
+export const movieKeys = {
+  all: ['movies'],
+  lists: () => ({
+    queryKey: [...movieKeys.all, 'list'],
+    /** @param {QueryContext} __ */
+    queryFn: ({ signal }) => {
+      const url = new URL(`${API_BASE_URL}/movies`);
+      const data = fetchJson(url, { signal });
+      return data;
+    },
+  }),
+  /** @param {string|number} movieId */
+  detail: movieId => ({
+    queryKey: [...movieKeys.all, 'detail', movieId],
+    /** @param {QueryContext} __ */
+    queryFn: async ({ signal }) => {
+      const url = new URL(`${API_BASE_URL}/movies/${movieId}`);
+      const res = await fetchJson(url, { signal });
+      const movie = res?.data ?? res;
+      const addReviews = populateReviews(signal);
+      const addTheaters = populateTheaters(signal);
+      const data = await addTheaters(await addReviews(movie));
+      return data;
+    },
+  }),
+};
+
+export const theaterKeys = {
+  all: ['theaters'],
+  lists: () => ({
+    queryKey: [...theaterKeys.all, 'list'],
+    /** @param {QueryContext} __ */
+    queryFn: async ({ signal }) => {
+      const url = new URL(`${API_BASE_URL}/theaters`);
+      const data = await fetchJson(url, { signal });
+      return data;
+    },
+  }),
+};
