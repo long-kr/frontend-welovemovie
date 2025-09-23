@@ -7,6 +7,7 @@ import ReviewList from './ReviewList';
 import TheaterList from './TheaterList';
 import { movieKeys } from '../utils/api';
 import { useQueryClient } from 'react-query';
+import OptimizedImage from '../shared/OptimizedImage';
 
 export default function MoviePage() {
   const queryClient = useQueryClient();
@@ -37,11 +38,10 @@ export default function MoviePage() {
       {!isLoading && !error && (
         <section className="row mt-4">
           <article className="col-sm-12 col-md-6 col-lg-3">
-            <img
+            <OptimizedImage
               alt={`${movie.title} Poster`}
               className="rounded"
               src={movie.image_url}
-              style={{ width: '100%' }}
             />
           </article>
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ErrorAlert from '../shared/ErrorAlert';
 import { Loading } from '../ui';
 import { movieKeys } from '../utils/api';
+import OptimizedImage from '../shared/OptimizedImage';
 
 function HomePage() {
   const { isLoading, error, data } = useQuery({
@@ -29,11 +30,10 @@ function HomePage() {
               key={movie.movie_id}
               className="col-sm-12 col-md-6 col-lg-3 my-2"
             >
-              <img
+              <OptimizedImage
                 alt={`${movie.title} Poster`}
                 className="rounded"
                 src={movie.image_url}
-                style={{ width: '100%' }}
               />
 
               <Link

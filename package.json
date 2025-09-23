@@ -13,6 +13,7 @@
     "markdown": "^0.5.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-lazy-load-image-component": "^1.6.3",
     "react-query": "^3.39.3",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",

@@ -1,5 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import OptimizedImage from '../shared/OptimizedImage';
 
 function Theater({ theater }) {
   return (
@@ -16,10 +17,10 @@ function Theater({ theater }) {
         </aside>
         <section className="col">
           <div className="row">
-            {theater.movies.map((movie) => (
+            {theater.movies.map(movie => (
               <div key={movie.movie_id} className="col-2">
                 <Link to={`/movies/${movie.movie_id}`}>
-                  <img
+                  <OptimizedImage
                     alt={`${movie.title} Poster`}
                     src={movie.image_url}
                     className="w-100"
