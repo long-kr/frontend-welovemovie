@@ -9,12 +9,27 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+/**
+ * @typedef {'info' | 'success' | 'warning' | 'error'} ToastVariant
+ * @typedef {'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'} ToastPlacement
+ * @typedef {Object} Toast
+ * @property {number} id
+ * @property {boolean} visible
+ * @property {React.ReactNode} message
+ * @property {string} title
+ * @property {ToastVariant} variant
+ * @property {ToastPlacement} placement
+ * @property {number} autoHideDuration
+ */
+
+/** @type {React.Context<{ showToast: (msg: any, opts?: any) => void, hideToast: () => void }>} */
 const ToastContext = createContext({
   // eslint-disable-next-line
   showToast: ({}) => {},
   hideToast: () => {},
 });
 
+/** @type {Toast} */
 const DEFAULT_TOAST = {
   id: 0,
   visible: false,
@@ -69,6 +84,11 @@ const VARIANT_THEMES = {
   },
 };
 
+/**
+ * @param {Object} props
+ * @param {Toast} props.toast
+ * @param {() => void} props.onClose
+ */
 function ToastOverlay({ toast, onClose }) {
   useEffect(() => {
     if (!toast.visible) return undefined;
@@ -82,9 +102,11 @@ function ToastOverlay({ toast, onClose }) {
 
   if (!toast.visible) return null;
 
+  const placement = toast.placement || DEFAULT_TOAST.placement;
+  const variant = toast.variant || DEFAULT_TOAST.variant;
   const placementStyle =
-    PLACEMENT_STYLES[toast.placement] || PLACEMENT_STYLES['bottom-right'];
-  const variantTheme = VARIANT_THEMES[toast.variant] || VARIANT_THEMES.info;
+    PLACEMENT_STYLES[placement] || PLACEMENT_STYLES['bottom-right'];
+  const variantTheme = VARIANT_THEMES[variant] || VARIANT_THEMES.info;
   const role = toast.variant === 'error' ? 'alert' : 'status';
   const ariaLive = toast.variant === 'error' ? 'assertive' : 'polite';
 
@@ -135,9 +157,23 @@ function ToastOverlay({ toast, onClose }) {
   );
 }
 
+/**
+ * @typedef {Object} ToastOptions
+ * @property {number} [autoHideDuration]
+ * @property {ToastVariant} [variant]
+ * @property {ToastPlacement} [placement]
+ * @property {string} [title]
+ */
+
+/**
+ * @param {Object} props
+ * @param {import('react').ReactNode} props.children
+ */
 export function ToastProvider({ children }) {
   const [toast, setToast] = useState(() => ({ ...DEFAULT_TOAST }));
-  const [portalElement, setPortalElement] = useState(null);
+  const [portalElement, setPortalElement] = useState(
+    /** @type {HTMLElement|null} */ (null)
+  );
 
   useEffect(() => {
     if (typeof document === 'undefined') return undefined;
@@ -156,59 +192,86 @@ export function ToastProvider({ children }) {
     setToast(() => ({ ...DEFAULT_TOAST }));
   }, []);
 
-  const showToast = useCallback((messageOrConfig, optionsOrOverrides = {}) => {
-    let message = messageOrConfig;
-    let options = optionsOrOverrides;
+  /**
+   * @param {React.ReactNode | { message: React.ReactNode } & Partial<Toast>} messageOrConfig
+   * @param {Partial<Toast>} [optionsOrOverrides]
+   */
+  const showToast = useCallback(
+    /**
+     * @param {React.ReactNode | ({ message: React.ReactNode } & Partial<Toast>)} messageOrConfig
+     * @param {Partial<Toast>} [optionsOrOverrides]
+     */
+    (messageOrConfig, optionsOrOverrides = {}) => {
+      /** @type {Partial<Toast>} */
+      let options = optionsOrOverrides;
+      /** @type {React.ReactNode} */
+      let message;
 
-    if (
-      typeof messageOrConfig === 'object' &&
-      messageOrConfig !== null &&
-      !isValidElement(messageOrConfig)
-    ) {
-      const { message: extractedMessage, ...rest } = messageOrConfig;
-      message = extractedMessage;
-      options = rest;
-    }
-
-    let toastMessage = message;
-
-    if (!isValidElement(toastMessage)) {
-      if (typeof toastMessage === 'number') {
-        toastMessage = String(toastMessage);
-      } else if (typeof toastMessage !== 'string') {
-        toastMessage = toastMessage ?? '';
-        toastMessage =
-          typeof toastMessage === 'string'
-            ? toastMessage
-            : String(toastMessage);
+      // Type guard for the config object shape
+      if (
+        messageOrConfig &&
+        typeof messageOrConfig === 'object' &&
+        !isValidElement(messageOrConfig) &&
+        'message' in messageOrConfig &&
+        messageOrConfig.message !== undefined
+      ) {
+        message = messageOrConfig.message;
+        options = messageOrConfig;
+      } else {
+        message = /** @type {React.ReactNode} */ (messageOrConfig);
       }
-    }
 
-    setToast(() => {
-      const nextDuration =
-        typeof options.autoHideDuration === 'number'
-          ? options.autoHideDuration
-          : DEFAULT_TOAST.autoHideDuration;
+      let toastMessage = message;
 
-      const nextVariant = VARIANT_THEMES[options.variant]
-        ? options.variant
-        : DEFAULT_TOAST.variant;
+      if (!isValidElement(toastMessage)) {
+        if (typeof toastMessage === 'number') {
+          toastMessage = String(toastMessage);
+        } else if (typeof toastMessage !== 'string') {
+          toastMessage = toastMessage ?? '';
+          toastMessage =
+            typeof toastMessage === 'string'
+              ? toastMessage
+              : String(toastMessage);
+        }
+      }
 
-      const nextPlacement = PLACEMENT_STYLES[options.placement]
-        ? options.placement
-        : DEFAULT_TOAST.placement;
+      setToast(() => {
+        const nextDuration =
+          typeof options.autoHideDuration === 'number'
+            ? options.autoHideDuration
+            : DEFAULT_TOAST.autoHideDuration;
 
-      return {
-        id: Date.now(),
-        visible: true,
-        message: toastMessage,
-        title: options.title ?? DEFAULT_TOAST.title,
-        variant: nextVariant,
-        placement: nextPlacement,
-        autoHideDuration: nextDuration,
-      };
-    });
-  }, []);
+        // Safe access since we know these are literal types via ToastVariant & ToastPlacement
+        const variant = /** @type {keyof typeof VARIANT_THEMES} */ (
+          options.variant
+        );
+        const placement = /** @type {keyof typeof PLACEMENT_STYLES} */ (
+          options.placement
+        );
+
+        const nextVariant =
+          variant && VARIANT_THEMES[variant] ? variant : DEFAULT_TOAST.variant;
+
+        const nextPlacement =
+          placement && PLACEMENT_STYLES[placement]
+            ? placement
+            : DEFAULT_TOAST.placement;
+
+        /** @type {Toast} */
+        const nextToast = {
+          id: Date.now(),
+          visible: true,
+          message: toastMessage,
+          title: options.title ?? DEFAULT_TOAST.title,
+          variant: nextVariant,
+          placement: nextPlacement,
+          autoHideDuration: nextDuration,
+        };
+        return nextToast;
+      });
+    },
+    []
+  );
 
   const contextValue = useMemo(
     () => ({
@@ -232,6 +295,10 @@ export function ToastProvider({ children }) {
   );
 }
 
+/**
+ * Hook to use toast notifications
+ * @returns {{ showToast: (msg: React.ReactNode | { message: React.ReactNode } & Partial<Toast>, opts?: Partial<Toast>) => void, hideToast: () => void }}
+ */
 export function useToast() {
   const context = useContext(ToastContext);
 
