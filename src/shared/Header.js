@@ -1,12 +1,14 @@
-import React from "react";
-import HeaderNav from "./HeaderNav";
-import headerImage from "./header.jpg";
+import React from 'react';
+import HeaderNav from './HeaderNav';
+import headerImage from './header.jpg';
 
 function Header() {
   const style = {
     background: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.7)), url(${headerImage})`,
-    backgroundPosition: "center",
-    backgroundSize: "100% auto",
+    backgroundPosition: 'center',
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed',
   };
 
   return (

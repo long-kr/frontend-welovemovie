@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import OptimizedImage from '../shared/OptimizedImage';
 
 export default function MovieInfo({ movie }) {
   const {
@@ -15,11 +16,10 @@ export default function MovieInfo({ movie }) {
   return (
     <section className="row mt-4">
       <article className="col-sm-12 col-md-6 col-lg-3">
-        <img
+        <OptimizedImage
           alt={`${title} Poster`}
           className="rounded"
           src={image_url}
-          style={{ width: '100%' }}
         />
       </article>
 
