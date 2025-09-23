@@ -2,7 +2,7 @@ import Review from './Review';
 
 export default function ReviewList({
   reviews = [],
-  setReviewScore,
+  onUpdateScore,
   isUpdating,
 }) {
   return (
@@ -20,7 +20,7 @@ export default function ReviewList({
             <Review
               key={review.review_id}
               review={review}
-              setReviewScore={setReviewScore}
+              onUpdateScore={onUpdateScore}
               isLoading={isUpdating}
             />
           ))

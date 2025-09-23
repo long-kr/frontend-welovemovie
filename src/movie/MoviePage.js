@@ -5,15 +5,27 @@ import Loading from '../ui/Loading';
 import Details from './Details';
 import ReviewList from './ReviewList';
 import TheaterList from './TheaterList';
+import { movieKeys } from '../utils/api';
+import { useQueryClient } from 'react-query';
 
 export default function MoviePage() {
+  const queryClient = useQueryClient();
   const { movieId } = useParams();
   const { isLoading, error, movie } = useMovies(movieId);
 
   const { mutate, isUpdating } = useReviews();
 
-  const updateScoreHandler = async ({ movie_id, review_id }, score) => {
-    mutate({ reviewId: review_id, score, movieId: movie_id });
+  const updateScoreHandler = async ({ review_id }, score) => {
+    const data = {
+      reviewId: review_id,
+      data: { score },
+    };
+
+    mutate(data, {
+      onSuccess: () => {
+        queryClient.invalidateQueries(movieKeys.detail(movieId).queryKey);
+      },
+    });
   };
 
   return (
@@ -40,7 +52,7 @@ export default function MoviePage() {
 
             <ReviewList
               reviews={movie.reviews}
-              setReviewScore={updateScoreHandler}
+              onUpdateScore={updateScoreHandler}
               isUpdating={isUpdating}
             />
           </aside>

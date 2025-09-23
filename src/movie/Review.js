@@ -4,17 +4,17 @@ const scoreButtonStyle = {
   padding: '0 0px 5px 5px',
 };
 
-export default function Review({ review, setReviewScore, isUpdating }) {
+export default function Review({ review, onUpdateScore, isLoading }) {
   const handleIncreaseClick = () => {
     const score = review.score + 1;
     if (score > 5) return;
-    setReviewScore(review, score);
+    onUpdateScore(review, score);
   };
 
   const handleDecreaseClick = () => {
     const score = review.score - 1;
     if (score < 1) return;
-    setReviewScore(review, score);
+    onUpdateScore(review, score);
   };
 
   const { critic } = review;
@@ -35,7 +35,7 @@ export default function Review({ review, setReviewScore, isUpdating }) {
         <button
           className="btn btn-link mr-2"
           style={scoreButtonStyle}
-          disabled={isUpdating}
+          disabled={isLoading}
           onClick={() => handleIncreaseClick()}
         >
           ↑
@@ -43,7 +43,7 @@ export default function Review({ review, setReviewScore, isUpdating }) {
         <button
           className="btn btn-link mr-2"
           style={scoreButtonStyle}
-          disabled={isUpdating}
+          disabled={isLoading}
           onClick={() => handleDecreaseClick()}
         >
           ↓

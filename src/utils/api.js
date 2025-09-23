@@ -73,17 +73,12 @@ function populateTheaters(signal) {
   };
 }
 
-export async function deleteReview(reviewId) {
-  const url = `${API_BASE_URL}/reviews/${reviewId}`;
-  return await fetchJson(url, { method: 'DELETE', headers }, {});
-}
-
 export async function updateReview(reviewId, data) {
   const url = `${API_BASE_URL}/reviews/${reviewId}`;
   const options = {
     method: 'PUT',
     headers,
-    body: data,
+    body: { data },
   };
   return await fetchJson(url, options, {});
 }

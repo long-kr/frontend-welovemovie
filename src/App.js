@@ -4,8 +4,25 @@ import MovieDetailPage from './movie/MoviePage';
 import ListMoviesPage from './movies/MoviesPage';
 import Header from './shared/Header';
 import TheaterList from './theaters/TheaterPage';
+import { useEffect } from 'react';
+
+function printHelloWithHash() {
+  const pattern = [
+    '#   #  #####  #      #      #####',
+    '#   #  #      #      #      #   #',
+    '#####  #####  #      #      #   #',
+    '#   #  #      #      #      #   #',
+    '#   #  #####  #####  #####  #####',
+  ];
+
+  pattern.forEach(line => console.log(line));
+}
 
 export default function App() {
+  useEffect(() => {
+    printHelloWithHash();
+  }, []);
+
   return (
     <Router>
       <Header />
