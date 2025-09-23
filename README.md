@@ -116,7 +116,7 @@ The backend API should provide the following endpoints:
 
 ## Project Structure
 
-```
+```bash
 src/
 ├── home/          # Home page components
 ├── hooks/         # Custom React hooks
