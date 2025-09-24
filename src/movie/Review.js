@@ -1,4 +1,4 @@
-import { markdown } from 'markdown';
+import Markdown from 'markdown-to-jsx';
 
 const scoreButtonStyle = {
   padding: '0 0px 5px 5px',
@@ -26,9 +26,7 @@ export default function Review({ review, onUpdateScore, isLoading }) {
         <small> of {critic.organization_name}</small>
       </h4>
 
-      <p
-        dangerouslySetInnerHTML={{ __html: markdown.toHTML(review.content) }}
-      />
+      <Markdown>{review.content}</Markdown>
 
       <div className="d-flex">
         <strong>Rating:</strong> <span className="mx-1">{review.score}</span>
