@@ -9,3 +9,17 @@ export const useMovies = (movieId) => {
 
   return { isLoading, error, movie: data };
 };
+
+export const useMoviesList = (params = {}) => {
+  const { isLoading, error, data } = useQuery({
+    queryKey: movieKeys.lists(params).queryKey,
+    queryFn: movieKeys.lists(params).queryFn,
+  });
+
+  return {
+    isLoading,
+    error,
+    movies: data?.data || [],
+    pagination: data?.pagination || null,
+  };
+};

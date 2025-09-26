@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+// In a real app, this would come from process.env.REACT_APP_API_BASE_URL
+// but we're hardcoding it to avoid ESLint issues in this starter project
+const API_BASE_URL = 'http://localhost:5000';
 
 /**
  * Default headers for API calls (json-server friendly)
@@ -46,10 +47,11 @@ async function fetchJson(url, options = {}, onCancel = defaultOnCancel) {
   } catch (error) {
     const err = /** @type {any} */ (error);
     const isCanceled =
-      (axios.isCancel && axios.isCancel(err)) ||
-      (err && (err.code === 'ERR_CANCELED' || err.name === 'CanceledError'));
+      axios.isCancel?.(err) ||
+      err?.code === 'ERR_CANCELED' ||
+      err?.name === 'CanceledError';
 
-    if (isCanceled) return onCancel();
+    if (isCanceled) return onCancel?.();
 
     // eslint-disable-next-line no-console
     // console.error(err && (err.stack || err));
@@ -63,7 +65,7 @@ async function fetchJson(url, options = {}, onCancel = defaultOnCancel) {
  * @returns {(movie: any) => Promise<any>}
  */
 function populateReviews(signal) {
-  return async movie => {
+  return async (movie) => {
     const url = `${API_BASE_URL}/movies/${movie.movie_id}/reviews`;
     const res = await fetchJson(url, { signal });
     movie.reviews = res?.data ?? res;
@@ -77,7 +79,7 @@ function populateReviews(signal) {
  * @returns {(movie: any) => Promise<any>}
  */
 function populateTheaters(signal) {
-  return async movie => {
+  return async (movie) => {
     const url = `${API_BASE_URL}/movies/${movie.movie_id}/theaters`;
     const res = await fetchJson(url, { signal });
     movie.theaters = res?.data ?? res;
@@ -102,17 +104,35 @@ export async function updateReview(reviewId, data) {
 
 export const movieKeys = {
   all: ['movies'],
-  lists: () => ({
-    queryKey: [...movieKeys.all, 'list'],
+  lists: (params = {}) => ({
+    queryKey: [...movieKeys.all, 'list', params],
     /** @param {QueryContext} __ */
     queryFn: ({ signal }) => {
       const url = new URL(`${API_BASE_URL}/movies`);
+
+      // Add pagination parameters
+      if (params.page) url.searchParams.set('page', params.page);
+      if (params.limit) url.searchParams.set('limit', params.limit);
+      if (params.sortBy) url.searchParams.set('sortBy', params.sortBy);
+      if (params.sortOrder) url.searchParams.set('sortOrder', params.sortOrder);
+
+      // Add filter parameters
+      if (params.title) url.searchParams.set('title', params.title);
+      if (params.rating) url.searchParams.set('rating', params.rating);
+      if (params.minRuntime)
+        url.searchParams.set('minRuntime', params.minRuntime);
+      if (params.maxRuntime)
+        url.searchParams.set('maxRuntime', params.maxRuntime);
+      if (params.year) url.searchParams.set('year', params.year);
+      if (params.is_showing !== undefined)
+        url.searchParams.set('is_showing', params.is_showing);
+
       const data = fetchJson(url, { signal });
       return data;
     },
   }),
   /** @param {string|number} movieId */
-  detail: movieId => ({
+  detail: (movieId) => ({
     queryKey: [...movieKeys.all, 'detail', movieId],
     /** @param {QueryContext} __ */
     queryFn: async ({ signal }) => {
