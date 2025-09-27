@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { debounce } from '../utils/helper';
 
 export default function MovieFilters({
   filters,
@@ -8,10 +9,20 @@ export default function MovieFilters({
 }) {
   const [localFilters, setLocalFilters] = useState(filters || {});
 
+  const debouncedCallback = useCallback(
+    debounce((key, value) => {
+      const newFilters = { ...localFilters, [key]: value };
+      setLocalFilters(newFilters);
+      onFiltersChange(newFilters);
+    }, 500),
+    [onFiltersChange]
+  );
+
   const handleFilterChange = (key, value) => {
-    const newFilters = { ...localFilters, [key]: value };
-    setLocalFilters(newFilters);
-    onFiltersChange(newFilters);
+    // Update local state immediately for responsive UI
+    setLocalFilters((prev) => ({ ...prev, [key]: value }));
+    // Debounce the callback to parent
+    debouncedCallback(key, value);
   };
 
   const handleSortChange = (sortBy, sortOrder) => {
@@ -192,15 +203,20 @@ export default function MovieFilters({
           </div>
 
           {/* Clear filters button */}
-          <div className="col-md-6 col-lg-3 mb-3 d-flex align-items-end">
-            <button
-              type="button"
-              className="btn btn-outline-secondary"
-              onClick={clearFilters}
-              disabled={!hasActiveFilters}
-            >
-              Clear Filters
-            </button>
+          <div className="col-md-6 col-lg-3 mb-3">
+            <div className="form-group d-flex flex-column">
+              <label htmlFor="clear-filters" className="form-control-label">
+                Clear Filters
+              </label>
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={clearFilters}
+                disabled={!hasActiveFilters}
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -60,7 +60,7 @@ export default function MoviesPage() {
 
       {/* Movies list */}
       {!isLoading && (
-        <>
+        <div className="py-4">
           {movies.length === 0 ? (
             <div className="alert alert-info" role="alert">
               No movies found matching your criteria.
@@ -79,7 +79,7 @@ export default function MoviesPage() {
               />
             </>
           )}
-        </>
+        </div>
       )}
     </main>
   );

@@ -2,7 +2,8 @@ import axios from 'axios';
 
 // In a real app, this would come from process.env.REACT_APP_API_BASE_URL
 // but we're hardcoding it to avoid ESLint issues in this starter project
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
 /**
  * Default headers for API calls (json-server friendly)
@@ -10,7 +11,9 @@ const API_BASE_URL = 'http://localhost:5000';
  */
 export const defaultHeaders = { 'Content-Type': 'application/json' };
 
-const defaultOnCancel = () => undefined;
+const defaultOnCancel = () => {
+  process.env.NODE_ENV === 'development' && console.log('defaultOnCancel');
+};
 
 /**
  * Helper typedef for react-query queryFn context
