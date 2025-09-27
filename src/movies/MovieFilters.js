@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useCallback, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { debounce } from '../utils/helper';
 
 export default function MovieFilters({
@@ -9,19 +9,16 @@ export default function MovieFilters({
 }) {
   const [localFilters, setLocalFilters] = useState(filters || {});
 
-  const debouncedCallback = useCallback(
+  const debouncedCallback = useRef(
     debounce((key, value) => {
       const newFilters = { ...localFilters, [key]: value };
       setLocalFilters(newFilters);
       onFiltersChange(newFilters);
-    }, 500),
-    [onFiltersChange]
-  );
+    }, 500)
+  ).current;
 
   const handleFilterChange = (key, value) => {
-    // Update local state immediately for responsive UI
     setLocalFilters((prev) => ({ ...prev, [key]: value }));
-    // Debounce the callback to parent
     debouncedCallback(key, value);
   };
 
