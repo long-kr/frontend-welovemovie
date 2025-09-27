@@ -1,16 +1,44 @@
-import { useQuery } from 'react-query';
+import React, { useState } from 'react';
+import { useMoviesList } from '../hooks/useMovies';
 import ErrorAlert from '../shared/ErrorAlert';
-import { Loading } from '../ui';
-import { movieKeys } from '../utils/api';
+import { Loading, Pagination } from '../ui';
+import MovieFilters from './MovieFilters';
 import MovieInfo from './MovieInfo';
 
 export default function MoviesPage() {
-  const { error, isLoading, data } = useQuery({
-    queryKey: movieKeys.lists().queryKey,
-    queryFn: movieKeys.lists().queryFn,
+  const [filters, setFilters] = useState({});
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    sortBy: 'title',
+    sortOrder: 'asc',
   });
 
-  const movies = data?.data || [];
+  const queryParams = { ...filters, ...pagination };
+  const {
+    error,
+    isLoading,
+    movies,
+    pagination: paginationData,
+  } = useMoviesList(queryParams);
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+    // Reset to first page when filters change
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  };
+
+  const handleSortChange = (sortOptions) => {
+    setPagination((prev) => ({ ...prev, ...sortOptions, page: 1 }));
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination((prev) => ({ ...prev, page: newPage }));
+  };
+
+  const handleLimitChange = (newLimit) => {
+    setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
+  };
 
   return (
     <main className="container">
@@ -20,10 +48,39 @@ export default function MoviesPage() {
 
       <hr />
 
+      {/* Filters and sorting */}
+      <MovieFilters
+        filters={queryParams}
+        onFiltersChange={handleFiltersChange}
+        onSortChange={handleSortChange}
+      />
+
+      {/* Loading state */}
       {isLoading && <Loading />}
 
-      {!isLoading &&
-        movies.map(movie => <MovieInfo key={movie.movie_id} movie={movie} />)}
+      {/* Movies list */}
+      {!isLoading && (
+        <div className="py-4">
+          {movies.length === 0 ? (
+            <div className="alert alert-info" role="alert">
+              No movies found matching your criteria.
+            </div>
+          ) : (
+            <>
+              {movies.map((movie) => (
+                <MovieInfo key={movie.movie_id} movie={movie} />
+              ))}
+
+              {/* Pagination */}
+              <Pagination
+                pagination={paginationData}
+                onPageChange={handlePageChange}
+                onLimitChange={handleLimitChange}
+              />
+            </>
+          )}
+        </div>
+      )}
     </main>
   );
 }
