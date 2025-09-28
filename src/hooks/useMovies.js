@@ -19,7 +19,7 @@ export const useMoviesList = (params = {}) => {
   return {
     isLoading,
     error,
-    movies: data?.data || [],
+    movies: data?.data || data || [],
     pagination: data?.pagination || null,
   };
 };

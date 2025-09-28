@@ -1,5 +1,5 @@
-import React from "react";
-import AverageRating from "./AverageRating";
+import React from 'react';
+import AverageRating from './AverageRating';
 
 function Details({ movie }) {
   return (
@@ -11,6 +11,9 @@ function Details({ movie }) {
       </p>
       <p>
         <strong>Rating:</strong> {movie.rating}
+      </p>
+      <p>
+        <strong>Source:</strong> {String(movie.source).toUpperCase()}
       </p>
       <AverageRating reviews={movie.reviews} />
     </section>

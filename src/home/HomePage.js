@@ -1,17 +1,11 @@
-import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
+import { useMoviesList } from '../hooks/useMovies';
 import ErrorAlert from '../shared/ErrorAlert';
-import { Loading } from '../ui';
-import { movieKeys } from '../utils/api';
 import OptimizedImage from '../shared/OptimizedImage';
+import { Loading } from '../ui';
 
 function HomePage() {
-  const { isLoading, error, data } = useQuery({
-    queryKey: movieKeys.lists().queryKey,
-    queryFn: movieKeys.lists().queryFn,
-  });
-
-  const movies = data?.data || [];
+  const { isLoading, error, movies } = useMoviesList({ is_showing: true });
 
   return (
     <main className="container">
@@ -25,7 +19,7 @@ function HomePage() {
         <Loading />
       ) : (
         <div className="row">
-          {movies.map(movie => (
+          {movies.map((movie) => (
             <article
               key={movie.movie_id}
               className="col-sm-12 col-md-6 col-lg-3 my-2"
