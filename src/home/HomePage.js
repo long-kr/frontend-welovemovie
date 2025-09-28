@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { useMoviesList } from '../hooks/useMovies';
+import { useMoviesShowing } from '../hooks/useMovies';
 import ErrorAlert from '../shared/ErrorAlert';
 import OptimizedImage from '../shared/OptimizedImage';
 import { Loading } from '../ui';
 
 function HomePage() {
-  const { isLoading, error, movies } = useMoviesList({ is_showing: true });
+  const { isLoading, error, movies } = useMoviesShowing();
 
   return (
     <main className="container">

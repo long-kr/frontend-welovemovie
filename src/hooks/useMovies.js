@@ -23,3 +23,17 @@ export const useMoviesList = (params = {}) => {
     pagination: data?.pagination || null,
   };
 };
+
+export const useMoviesShowing = () => {
+  const { isLoading, error, data } = useQuery({
+    queryKey: movieKeys.showing().queryKey,
+    queryFn: movieKeys.showing().queryFn,
+  });
+
+  return {
+    isLoading,
+    error,
+    movies: data?.data || data || [],
+    pagination: data?.pagination || null,
+  };
+};
