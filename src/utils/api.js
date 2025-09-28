@@ -4,12 +4,16 @@ import axios from 'axios';
 // but we're hardcoding it to avoid ESLint issues in this starter project
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const API_KEY = process.env.REACT_APP_API_KEY
 
 /**
  * Default headers for API calls (json-server friendly)
  * @type {{[k:string]: string}}
  */
-export const defaultHeaders = { 'Content-Type': 'application/json' };
+export const defaultHeaders = { 
+  'Content-Type': 'application/json',
+  "x-api-key": API_KEY || "api-key"
+ };
 
 const defaultOnCancel = () => {
   process.env.NODE_ENV === 'development' && console.log('defaultOnCancel');
@@ -36,7 +40,10 @@ async function fetchJson(url, options = {}, onCancel = defaultOnCancel) {
     const config = {
       url: String(url),
       method: (options.method ?? 'get').toUpperCase(),
-      headers: options.headers ?? defaultHeaders,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers 
+      },
       data: options.body,
       signal: options.signal,
       ...options,
