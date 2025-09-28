@@ -4,7 +4,6 @@ import axios from 'axios';
 // but we're hardcoding it to avoid ESLint issues in this starter project
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
-const API_KEY = process.env.REACT_APP_API_KEY;
 
 /**
  * Default headers for API calls (json-server friendly)
@@ -12,7 +11,6 @@ const API_KEY = process.env.REACT_APP_API_KEY;
  */
 export const defaultHeaders = {
   'Content-Type': 'application/json',
-  'x-api-key': API_KEY || 'api-key',
 };
 
 const defaultOnCancel = () => {
